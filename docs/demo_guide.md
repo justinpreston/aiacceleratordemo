@@ -16,6 +16,7 @@ This guide is the presenter script for the demo described in [demo_proposal.md](
 - [ ] VS Code open with the repo and GitHub Copilot enabled (for the "extend with code" step).
 - [ ] Azure subscription signed in for deploying the Azure Function.
 - [ ] Work order dashboard open in a browser tab to show live updates.
+- [ ] **Copilot Cowork plugin (Contoso Equipment Insights) installed and enabled** (for the deck-generation finale). See [setup_guide.md](./setup_guide.md) Part E.
 - [ ] Test pane pre-loaded with one warm-up question.
 
 ---
@@ -42,6 +43,10 @@ Set the scene: a maintenance manager at Contoso Electronics needs an assistant t
 - Ask a question that needs **both** knowledge and the new action (e.g., look up an equipment issue and create a work order).
 - The agent reasons over the documents, calls the function (which writes to the deployed system), and returns an actionable answer.
 - Switch to the **work order dashboard** to show the new work order appear live.
+
+### 6. (Optional finale) Generate a deck with Copilot Cowork (1 min)
+- Switch to **Copilot Cowork** and prompt it to build an equipment status PowerPoint.
+- The **Contoso Equipment Insights** plugin pulls live data from the same system and produces a deck — see [Generating a PowerPoint with Copilot Cowork](#generating-a-powerpoint-with-copilot-cowork).
 
 ---
 
@@ -155,6 +160,36 @@ curl "https://$funcApp.azurewebsites.net/api/checkWarranty?assetId=CE-OSC-1200&c
 ### Step D — Verify end to end
 
 In the **Test** pane, run the Section D questions below (e.g., "Is CE-OSC-1200 under warranty?" and "Create a work order for the laser cutter"). Confirm the agent calls the functions and that new work orders appear on the dashboard.
+
+---
+
+## Generating a PowerPoint with Copilot Cowork
+
+This is the optional finale (run-of-show step 6). It shows the **same** Work Order & Warranty System data being turned into a polished artifact by **Copilot Cowork** using the **Contoso Equipment Insights** plugin ([../cowork-plugin](../cowork-plugin)).
+
+**Prerequisite:** the plugin is installed and enabled per [setup_guide.md](./setup_guide.md) Part E, and its connector points at your deployed system's `/mcp` endpoint.
+
+### Steps
+
+1. Open **Copilot Cowork**.
+2. Go to **Sources & Skills → Plugins** and confirm **Contoso Equipment Insights** is enabled.
+3. Enter one of the prompts below. Cowork triggers the `generate-equipment-deck` skill, calls the connector tools (`get_summary`, `list_equipment`, `list_work_orders`, ...) to pull **live** data, and builds the deck.
+4. Show the generated PowerPoint \u2014 point out that the asset IDs, warranty statuses, and work orders match the dashboard and the agent's answers (single source of truth).
+
+### Prompts to use
+
+| Prompt | Result |
+|--------|--------|
+| "Create a PowerPoint deck summarizing our equipment warranty status and open work orders." | Full-fleet status deck (title, executive summary, inventory, warranty, attention-needed, work orders, recommendations). |
+| "Generate an equipment status presentation and highlight anything out of warranty." | Deck emphasizing expired/expiring assets (e.g., CE-LAS-3300, CE-WAV-2600, CE-SOL-0450). |
+| "Build a slide deck of all open and critical work orders by equipment." | Work-order-focused deck grouped by priority. |
+| "Make a warranty summary deck for our test & measurement equipment." | Category-scoped deck (oscilloscope, function generator, multimeter, power supply). |
+
+### Presenter tips
+
+- Keep the **work order dashboard** visible alongside the generated deck so the audience sees the data match.
+- If you created a new work order during step 5, ask Cowork to regenerate the deck to show it now includes that work order \u2014 reinforcing "one system, many surfaces".
+- If the deck lacks real data, verify the plugin connector `mcpServerUrl` and that the system's `/mcp` endpoint is reachable.
 
 ---
 

@@ -58,6 +58,14 @@ Base URL: `<app-url>/api`
 | POST | `/workorders` | Create a work order. |
 | PATCH | `/workorders/{id}` | Update status / priority / assignee / add note. |
 | GET | `/stats` | Dashboard summary counts. |
+| POST | `/mcp` | MCP endpoint (Streamable HTTP, JSON-RPC 2.0) used by the Copilot Cowork plugin. |
+
+### MCP connector
+
+`POST /mcp` exposes a Model Context Protocol server (stateless Streamable HTTP)
+consumed by the [Copilot Cowork plugin](../cowork-plugin). It provides these
+tools: `list_equipment`, `get_equipment`, `check_warranty`, `list_work_orders`,
+and `get_summary`. Implementation: [lib/mcp.js](./lib/mcp.js).
 
 ### Warranty response example
 

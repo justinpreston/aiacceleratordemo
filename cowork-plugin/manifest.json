@@ -1,0 +1,45 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.28/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.28",
+  "version": "1.0.0",
+  "id": "a7f3c9e2-4b1d-4e8a-9c2f-1d6b8e5a7c30",
+  "developer": {
+    "name": "Contoso Electronics",
+    "websiteUrl": "https://contoso.com",
+    "privacyUrl": "https://contoso.com/privacy",
+    "termsOfUseUrl": "https://contoso.com/terms"
+  },
+  "name": {
+    "short": "Contoso Equipment Insights",
+    "full": "Contoso Equipment Insights for Copilot Cowork"
+  },
+  "description": {
+    "short": "Generate equipment status decks and reports from the Work Order system.",
+    "full": "Connects Copilot Cowork to the Contoso Electronics Work Order & Warranty System and generates artifacts such as PowerPoint decks and reports covering equipment inventory, warranty status, and open work orders."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "accentColor": "#004B8D",
+  "agentSkills": [
+    {
+      "folder": "./skills/generate-equipment-deck"
+    }
+  ],
+  "agentConnectors": [
+    {
+      "id": "contoso-workorder-system",
+      "displayName": "Contoso Work Order & Warranty System",
+      "description": "Access to equipment inventory, warranty status, and work orders for Contoso Electronics.",
+      "toolSource": {
+        "remoteMcpServer": {
+          "mcpServerUrl": "https://REPLACE-WITH-YOUR-WORKORDER-APP.azurewebsites.net/mcp",
+          "authorization": {
+            "type": "None"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -9,11 +9,12 @@ This guide walks through setting up the full demo environment:
    - **Part of the documents on Azure AI Search** (the PDF documents, indexed from Azure Blob Storage)
 2. **Business system** — the **Work Order & Warranty System** ([../workorder-system](../workorder-system)) deployed to **Azure App Service**. It is the source of truth for warranty status and work orders that the agent's Azure Function will call.
 3. **Agent** — a **Microsoft Copilot Studio** agent that connects to the knowledge sources (and later, the deployed system via an Azure Function).
+4. **Artifact generation** — a **Copilot Cowork plugin** ([../cowork-plugin](../cowork-plugin)) that generates PowerPoint decks/reports from live Work Order & Warranty System data.
 
 Using two knowledge sources demonstrates that the agent can reason over knowledge no matter where it lives, and the deployed system shows the agent taking real business actions.
 
 > The equipment documents are generated in [../artifacts](../artifacts). See [generate_equipment_docs.py](../artifacts/generate_equipment_docs.py) to regenerate or change the format mix.
-> Deploy the Work Order & Warranty System **before** the demo (Part C below).
+> Deploy the Work Order & Warranty System **before** the demo (Part C below), then build/install the Cowork plugin (Part E).
 
 ---
 
@@ -29,6 +30,8 @@ Using two knowledge sources demonstrates that the agent can reason over knowledg
 | Azure App Service | For the Work Order & Warranty System (provisioned via Bicep in Part C) |
 | Node.js 18+ | To run/deploy the Work Order & Warranty System |
 | Azure CLI | Required for the Bicep deployment (`az`) |
+| Copilot Cowork | A Microsoft 365 account with **Copilot Cowork** access (for the plugin) |
+| M365 Agents Toolkit CLI | To package and install the Cowork plugin: `npm install -g @microsoft/m365agentstoolkit-cli` |
 | Permissions | Ability to create a SharePoint site/library and Azure resources |
 | Tools | Azure Portal access; Azure CLI; optionally Azure Storage Explorer |
 
@@ -188,7 +191,51 @@ az webapp up `
 
 ---
 
-## 6. Prepare for the "Extend with code" step
+## 6. Part E — Build and install the Copilot Cowork plugin
+
+The [../cowork-plugin](../cowork-plugin) package lets **Copilot Cowork** generate PowerPoint decks/reports from live Work Order & Warranty System data. It connects to the system's `/mcp` endpoint (deployed in Part C). Full details are in [../cowork-plugin/README.md](../cowork-plugin/README.md).
+
+### 6.1 Point the connector at your deployed system
+
+Edit [../cowork-plugin/manifest.json](../cowork-plugin/manifest.json) and replace the `mcpServerUrl` placeholder with your deployed system's MCP endpoint (the `webAppUrl` from Part C + `/mcp`):
+
+```json
+"mcpServerUrl": "https://<your-workorder-app>.azurewebsites.net/mcp"
+```
+
+### 6.2 Package the plugin
+
+From the `cowork-plugin` folder (all files must be at the zip **root**):
+
+```powershell
+cd cowork-plugin
+Compress-Archive -Path manifest.json, color.png, outline.png, skills -DestinationPath contoso-equipment-insights.zip -Force
+```
+
+### 6.3 Install (sideload) with the Agents Toolkit CLI
+
+```powershell
+npm install -g @microsoft/m365agentstoolkit-cli
+atk --version
+atk auth login
+atk install --file-path "./contoso-equipment-insights.zip" --scope Personal
+```
+
+A successful install returns a `TitleId` and `AppId` \u2014 save them for updates/uninstall.
+
+> For a tenant-wide rollout instead: **M365 admin center → Manage apps → Upload custom app**, then it appears under **Cowork → Sources & Skills → Plugins → Discover**.
+
+### 6.4 Enable and test
+
+1. Open **Copilot Cowork → Sources & Skills → Plugins** and enable **Contoso Equipment Insights**.
+2. Prompt: *"Create a PowerPoint deck summarizing our equipment warranty status and open work orders."*
+3. Confirm the deck is generated with real asset IDs and warranty data (proves the MCP connector is reachable).
+
+> If Cowork can't reach the connector, verify the deployed system's `/mcp` endpoint responds and that the `mcpServerUrl` in the manifest is correct.
+
+---
+
+## 7. Prepare for the "Extend with code" step
 
 During the demo you build an **Azure Function** that calls the Work Order & Warranty System deployed in Part C, then add it as a tool in Copilot Studio. To be ready:
 
@@ -203,10 +250,11 @@ See [demo_guide.md](./demo_guide.md) for the full run-of-show and sample questio
 
 ---
 
-## 7. Teardown
+## 8. Teardown
 
 After the demo, to avoid charges:
 
 - Delete the resource group holding the Work Order & Warranty System (`rg-contoso-workorders`) and the Azure Function.
 - Delete the Azure AI Search service and storage account (or their resource group).
+- Uninstall the Cowork plugin: `atk uninstall --title-id <TitleId>` (or remove it from the M365 admin center), using the `TitleId` saved during install.
 - Optionally remove the SharePoint library and unpublish the Copilot Studio agent.

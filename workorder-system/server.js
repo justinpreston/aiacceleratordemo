@@ -15,6 +15,7 @@
 const express = require('express');
 const path = require('path');
 const store = require('./lib/store');
+const { handleMcpRequest } = require('./lib/mcp');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -113,6 +114,11 @@ app.patch('/api/workorders/:id', (req, res) => {
 app.get('/api/stats', (_req, res) => {
   res.json(store.stats());
 });
+
+// ---------------------------------------------------------------------------
+// MCP endpoint (connector for the Copilot Cowork plugin)
+// ---------------------------------------------------------------------------
+app.post('/mcp', handleMcpRequest);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
