@@ -30,17 +30,131 @@ Set the scene: a maintenance manager at Contoso Electronics needs an assistant t
 - Ask a question answered by **SharePoint** (Word docs) and one answered by **Azure AI Search** (PDF docs) to prove both are working.
 
 ### 3. Extend the agent with code (3 min)
-- Switch to VS Code; use GitHub Copilot to generate an **Azure Function** that calls the already-deployed Work Order & Warranty System API (`checkWarranty` → `GET /equipment/{assetId}/warranty`, `createWorkOrder` → `POST /workorders`).
-- Deploy the function to Azure.
+- Switch to VS Code (this repo is open); use GitHub Copilot to generate **two Azure Functions** that call the already-deployed Work Order & Warranty System: `checkWarranty` (→ `GET /equipment/{assetId}/warranty`) and `createWorkOrder` (→ `POST /workorders`).
+- Deploy the Function App to Azure.
+- **Use the exact prompts and commands in [Building, deploying & connecting the Azure Functions](#building-deploying--connecting-the-azure-functions) below.**
 
 ### 4. Connect the new capability (2 min)
-- Add the Azure Function as a **tool/action** in Copilot Studio.
-- Show the agent picking it up immediately.
+- Add the two functions as **tools/actions** in Copilot Studio (see the same section below).
+- Show the agent picking them up immediately.
 
 ### 5. End-to-end experience (2 min)
 - Ask a question that needs **both** knowledge and the new action (e.g., look up an equipment issue and create a work order).
 - The agent reasons over the documents, calls the function (which writes to the deployed system), and returns an actionable answer.
 - Switch to the **work order dashboard** to show the new work order appear live.
+
+---
+
+## Building, deploying & connecting the Azure Functions
+
+This is the detailed script for demo steps 3 and 4. It creates **two HTTP-triggered Azure Functions** that act as the bridge between the Copilot Studio agent and the deployed Work Order & Warranty System:
+
+| Function | Method | Calls the system | Purpose |
+|----------|--------|------------------|---------|
+| `checkWarranty` | GET | `GET {WORKORDER_API_BASE}/equipment/{assetId}/warranty` | Check an asset's warranty status. |
+| `createWorkOrder` | POST | `POST {WORKORDER_API_BASE}/workorders` | Create a work order for an asset. |
+
+**Prerequisites for this step**
+- [Azure Functions Core Tools v4](https://learn.microsoft.com/azure/azure-functions/functions-run-local) (`func`) and Azure CLI (`az`) installed.
+- The **`apiBaseUrl`** from Part C of [setup_guide.md](./setup_guide.md) (e.g. `https://app-contosowo-xxxx.azurewebsites.net/api`).
+
+### Step A — Generate the functions with GitHub Copilot
+
+With this repo open, open Copilot Chat (agent mode) and use these prompts one at a time.
+
+**Prompt 1 — scaffold the project and the warranty function**
+
+> Create a new Azure Functions app in a new folder named `functions` at the repository root, using **Node.js** and the **v4 programming model** (JavaScript). Add an HTTP-triggered function named `checkWarranty` with `authLevel: 'function'` that accepts a **GET** request with an `assetId` query parameter. It should call `` `${process.env.WORKORDER_API_BASE}/equipment/${assetId}/warranty` `` using `fetch`, and return the JSON response and the same status code. If `assetId` is missing, return HTTP 400. Read the base URL from the `WORKORDER_API_BASE` environment variable.
+
+**Prompt 2 — add the create-work-order function**
+
+> In the same `functions` app, add an HTTP-triggered function named `createWorkOrder` with `authLevel: 'function'` that accepts a **POST** request with a JSON body containing `assetId`, `title`, `priority`, `description`, and `requestedBy`. It should POST that body to `` `${process.env.WORKORDER_API_BASE}/workorders` `` with `Content-Type: application/json`, and return the created work order JSON with the upstream status code. Validate that `assetId` and `title` are present, returning HTTP 400 otherwise.
+
+**Prompt 3 — local settings and an OpenAPI definition**
+
+> Add a `local.settings.json` with `WORKORDER_API_BASE` for local testing (do not commit secrets). Then generate an **OpenAPI 2.0 (Swagger)** file named `functions/openapi.json` describing both endpoints (`GET /api/checkWarranty` and `POST /api/createWorkOrder`), including parameters and example responses, so it can be imported as a custom connector in Copilot Studio.
+
+> Tip: Verify locally before deploying \u2014 run `func start` in the `functions` folder and call `http://localhost:7071/api/checkWarranty?assetId=CE-OSC-1200`.
+
+### Step B — Deploy the Function App to Azure
+
+Run from the repo root (reuses the resource group from Part C):
+
+```powershell
+# Variables
+$rg      = "rg-contoso-workorders"
+$loc     = "eastus"
+$storage = "stcontosofunc$(Get-Random -Maximum 99999)"
+$funcApp = "func-contoso-maint-$(Get-Random -Maximum 99999)"
+$apiBase = "<apiBaseUrl-from-Part-C>"   # e.g. https://app-contosowo-xxxx.azurewebsites.net/api
+
+# Storage account (required by Azure Functions)
+az storage account create -n $storage -g $rg -l $loc --sku Standard_LRS
+
+# Function App (Linux, Consumption, Node 20, Functions v4)
+az functionapp create -g $rg -n $funcApp `
+  --storage-account $storage `
+  --consumption-plan-location $loc `
+  --runtime node --runtime-version 20 --functions-version 4 --os-type Linux
+
+# Point the functions at the deployed Work Order & Warranty System
+az functionapp config appsettings set -g $rg -n $funcApp `
+  --settings WORKORDER_API_BASE=$apiBase
+
+# Publish the function code (from the functions folder)
+cd functions
+func azure functionapp publish $funcApp
+```
+
+Get the invoke URLs and function keys (needed for Copilot Studio):
+
+```powershell
+# Function key for each function
+az functionapp function keys list -g $rg -n $funcApp --function-name checkWarranty
+az functionapp function keys list -g $rg -n $funcApp --function-name createWorkOrder
+```
+
+The invoke URL pattern is:
+`https://<funcApp>.azurewebsites.net/api/checkWarranty?code=<functionKey>`
+
+Smoke-test the deployed function:
+
+```powershell
+curl "https://$funcApp.azurewebsites.net/api/checkWarranty?assetId=CE-OSC-1200&code=<functionKey>"
+```
+
+### Step C — Add the functions as tools in Copilot Studio
+
+**Recommended: import the OpenAPI file as a custom connector**
+
+1. In [Copilot Studio](https://copilotstudio.microsoft.com), open your **Contoso Maintenance Assistant** agent.
+2. Go to **Tools** (or **Actions**) → **Add a tool** → **New tool** → **Custom connector**. This opens Power Apps custom connectors.
+3. Choose **New custom connector** → **Import an OpenAPI file** and upload `functions/openapi.json`.
+4. On **General**, set **Host** to `<funcApp>.azurewebsites.net` and **Base URL** to `/api`.
+5. On **Security**, choose **API Key**, parameter name `code`, location **Query** (this carries the Azure Function key).
+6. On **Definition**, confirm the two operations (`checkWarranty`, `createWorkOrder`) and their parameters; give each a clear **Summary/Description**.
+7. **Create connector**, then **Test** it with a function key.
+8. Back in Copilot Studio, on the agent select **Add a tool**, pick your custom connector, and add both operations.
+
+**Alternative: add each function as a REST API / HTTP action**
+
+1. On the agent, **Add a tool** → **REST API** (or **Add an action** → **Create new**).
+2. Provide the method and URL, e.g. `GET https://<funcApp>.azurewebsites.net/api/checkWarranty`.
+3. Add the function key as a query parameter `code` or header `x-functions-key`.
+4. Define inputs (`assetId` for warranty; `assetId`, `title`, `priority`, `description`, `requestedBy` for work orders) and the JSON output.
+5. Repeat for `createWorkOrder` (POST with a JSON body).
+
+**For either approach — make the agent invoke the tools reliably**
+
+- Give each tool a clear **description**, e.g.:
+  - `checkWarranty`: "Checks the warranty status of a piece of equipment by its asset ID (e.g., CE-OSC-1200). Returns whether it is under warranty and days remaining."
+  - `createWorkOrder`: "Creates a maintenance work order for a piece of equipment. Requires the asset ID and a short title; accepts priority and description."
+- Describe each **input parameter** so the orchestrator maps user intent to arguments.
+- **Save** and **Publish** the agent.
+
+### Step D — Verify end to end
+
+In the **Test** pane, run the Section D questions below (e.g., "Is CE-OSC-1200 under warranty?" and "Create a work order for the laser cutter"). Confirm the agent calls the functions and that new work orders appear on the dashboard.
 
 ---
 
