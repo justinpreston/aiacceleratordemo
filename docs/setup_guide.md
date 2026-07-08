@@ -46,8 +46,8 @@ Using two knowledge sources demonstrates that the agent can reason over knowledg
 
 ## 2. Part A — Host the Word documents on SharePoint
 
-1. Go to the [SharePoint start page](https://www.office.com/launch/sharepoint) and select **Create site** → **Team site**.
-2. Name it, for example, **Contoso Electronics — Maintenance Knowledge** and finish creation.
+1. Go to the [SharePoint start page](https://www.office.com/launch/sharepoint) and select **Create site** → **Team site**. This option is now under Build on the left rail.
+2. Name it, for example, **Contoso Electronics — Maintenance Knowledge** and finish creation. Make it public, selecting public under Privacy Settings.
 3. In the site, open the default **Documents** library (or create a new library named `Equipment Docs`).
 4. Create a folder such as `Equipment Manuals` (optional) and **Upload** the 7 Word documents listed above from the `artifacts` folder.
 5. Wait a few minutes for SharePoint search to crawl and index the new files.
@@ -61,24 +61,47 @@ Using two knowledge sources demonstrates that the agent can reason over knowledg
 
 ### 3.1 Create the storage account and upload PDFs
 
-1. In the [Azure Portal](https://portal.azure.com), create a **Storage account** (Standard, LRS is fine) in your resource group.
-2. Under **Data storage → Containers**, create a container named `equipment-docs` (private access).
+1. In the [Azure Portal](https://portal.azure.com), create a **Storage account** in your resource group with these settings:
+   - **Name**: `stcontosoequipdocs` (must be globally unique, 3–24 lowercase letters/numbers; append a few random digits if the name is taken, e.g. `stcontosoequipdocs01`).
+   - **Preferred storage type**: **Azure Blob Storage or Azure Data Lake Storage** (this is what Azure AI Search indexes; do **not** pick Azure Files or Other). Leave the hierarchical namespace / Data Lake option **disabled** — flat blob storage works out of the box.
+   - **Performance**: **Standard** (general-purpose v2) — recommended; Premium is unnecessary for document storage.
+   - **Redundancy**: **Locally-redundant storage (LRS)** — cheapest and sufficient for the demo.
+2. After the storage account is created, go to **Data storage → Containers**, create a container named `equipment-docs` (private access).
 3. Upload the 8 PDF documents listed above (portal upload or Azure Storage Explorer).
 
 ### 3.2 Create the Azure AI Search service
 
 1. Create an **Azure AI Search** resource (Basic tier or higher) in the same region as the storage account.
+   - **Service name**: for example `srch-contoso-equipment` (or `contoso-equipment-search`). The name must be globally unique and 2–60 characters, lowercase letters/digits/dashes only, cannot start or end with a dash, and cannot contain consecutive dashes. Append digits if the name is taken (e.g. `srch-contoso-equipment-01`). This name forms the endpoint URL: `https://<service-name>.search.windows.net`.
 2. Once deployed, open the service and note the **URL** and, from **Keys**, an **admin key** (used only during setup).
 
-### 3.3 Build the index with "Import and vectorize data"
+### 3.3 Build the index
 
-1. In the search service, choose **Import and vectorize data** (or **Import data** for a classic keyword index).
+You can index with **keyword search** (simplest) or add **vectorization** (semantic/vector retrieval). Keyword search is sufficient for this demo.
+
+**Option A — Keyword search (recommended if you don't have Azure OpenAI):**
+
+1. In the search service, choose **Import data** (classic).
 2. **Data source**: select **Azure Blob Storage** → your storage account → the `equipment-docs` container.
-3. **Vectorization (optional but recommended)**: connect an **Azure OpenAI** embedding model (for example, `text-embedding-3-large`) to enable semantic/vector retrieval.
+3. **Index name**: `equipment-index`.
+4. (Optional) Enable **Semantic ranker** for better relevance — this does **not** require Azure OpenAI.
+5. Run the wizard to create the **data source**, **index**, and **indexer**.
+6. Under **Indexers**, confirm the indexer status is **Success** and documents were indexed.
+
+**Option B — Import and vectorize data (adds embeddings):**
+
+1. In the search service, choose **Import and vectorize data**.
+2. **Data source**: select **Azure Blob Storage** → your storage account → the `equipment-docs` container.
+3. **Vectorization**: connect an **Azure OpenAI** embedding model (for example, `text-embedding-3-large`).
 4. **Index name**: `equipment-index`.
 5. Enable **Semantic ranking** if available for richer answers.
 6. Run the wizard to create the **data source**, **skillset** (chunking + embeddings), **index**, and **indexer**.
 7. Under **Indexers**, confirm the indexer status is **Success** and documents were indexed.
+
+> **Getting "No access to this subscription, or no Azure OpenAI service available under it" in Option B step 3?**
+> The vectorization step needs an existing Azure OpenAI resource with a deployed embedding model. Either:
+> - **Use Option A** (keyword search) instead — fastest for the demo; or
+> - Create an **Azure OpenAI** resource, deploy an embedding model (e.g. `text-embedding-3-large`) in **Azure AI Foundry / Azure OpenAI Studio → Deployments**, then re-run the wizard and select that resource + deployment.
 
 ### 3.4 Verify
 
