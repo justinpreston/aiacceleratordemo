@@ -1,0 +1,17 @@
+# Python virtual environment
+.venv/
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# Packaged plugin
+*.zip
+
+# Runtime data
+workorder-system/data/workorders.json
+
+# Editor / OS
+.DS_Store
+.env
