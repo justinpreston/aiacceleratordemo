@@ -27,7 +27,7 @@ Using two knowledge sources demonstrates that the agent can reason over knowledg
 | Azure subscription | Owner/Contributor on a resource group |
 | Azure AI Search | Basic tier or higher (Semantic ranking requires Basic+) |
 | Azure Storage account | To hold the PDF documents for indexing |
-| Azure App Service | For the Work Order & Warranty System (provisioned via Bicep in Part C) |
+| Azure App Service | For the Work Order & Warranty System (provisioned via Bicep in Part C). Defaults to the **F1 Free** tier, which needs no VM quota. |
 | Node.js 18+ | To run/deploy the Work Order & Warranty System |
 | Azure CLI | Required for the Bicep deployment (`az`) |
 | Copilot Cowork | A Microsoft 365 account with **Copilot Cowork** access (for the plugin) |
@@ -133,6 +133,10 @@ az deployment group create `
 ```
 
 Record the deployment outputs: **`webAppName`**, **`webAppUrl`**, and **`apiBaseUrl`**.
+
+> **Defaults to the free tier.** The Bicep uses the **F1 (Free)** App Service Plan SKU, which runs on shared compute and needs no VM quota — ideal for a demo. Trade-offs: no "Always On" (the app cold-starts after idling) and ~60 CPU-minutes/day.
+>
+> **Hit a quota error like `Current Limit (Total VMs): 0`?** That happens with the dedicated `B1` tier when your subscription has no App Service VM quota in the region. Either keep the `F1` default, request a quota increase (see https://aka.ms/antquotahelp), or try another region (`az group create -l <region>`). To switch tiers, set `appServicePlanSku` in [../workorder-system/infra/main.parameters.json](../workorder-system/infra/main.parameters.json) (allowed: `F1`, `B1`, `B2`, `S1`, `P0v3`, `P1v3`).
 
 ### 4.2 Publish the application code
 
