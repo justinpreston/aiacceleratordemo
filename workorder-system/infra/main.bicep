@@ -28,15 +28,16 @@ param appName string = 'contosowo'
 @description('Azure region for all resources.')
 param location string = resourceGroup().location
 
-@description('App Service Plan SKU. B1 is sufficient for the demo.')
+@description('App Service Plan SKU. F1 (Free) needs no VM quota; B1 is the smallest dedicated tier.')
 @allowed([
+  'F1'
   'B1'
   'B2'
   'S1'
   'P0v3'
   'P1v3'
 ])
-param appServicePlanSku string = 'B1'
+param appServicePlanSku string = 'F1'
 
 @description('Node.js runtime version for the Linux Web App.')
 param nodeVersion string = '20-lts'
@@ -105,11 +106,11 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'NODE|${nodeVersion}'
-      alwaysOn: appServicePlanSku != 'B1' ? true : false
+      alwaysOn: (appServicePlanSku == 'F1' || appServicePlanSku == 'B1') ? false : true
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
       appCommandLine: 'npm start'
-      healthCheckPath: '/api/health'
+      healthCheckPath: appServicePlanSku == 'F1' ? null : '/api/health'
       appSettings: concat([
         {
           name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'

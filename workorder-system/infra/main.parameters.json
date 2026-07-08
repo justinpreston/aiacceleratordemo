@@ -6,7 +6,7 @@
       "value": "contosowo"
     },
     "appServicePlanSku": {
-      "value": "B1"
+      "value": "F1"
     },
     "nodeVersion": {
       "value": "20-lts"
