@@ -31,8 +31,8 @@ Set the scene: a maintenance manager at Contoso Electronics needs an assistant t
 - Ask a question answered by **SharePoint** (Word docs) and one answered by **Azure AI Search** (PDF docs) to prove both are working.
 
 ### 3. Extend the agent with code (3 min)
-- Switch to VS Code (this repo is open) and open **GitHub Copilot Chat** in **Agent mode**.
-- Run the saved prompt **`/connect-workorder-agent`** — or just say, in plain English: *"Connect our Work Order API to the agent so it can check warranty and create work orders."*
+- Open **GitHub Copilot** on this repo — the **GitHub Copilot app**, or VS Code Copilot Chat in **Agent mode**.
+- Just say it in plain English: *"Connect our Work Order API to the agent so it can check warranty and create work orders."* (In VS Code you can instead run the saved prompt **`/connect-workorder-agent`**.)
 - Copilot reads the repo and generates `workorder-system/openapi.json`, the connector the agent needs. All the technical precision lives in `.github/copilot-instructions.md`, so what you say on stage stays simple.
 - **Full run-of-show and the one-time setup are in [Extending the agent with GitHub Copilot](#extending-the-agent-with-github-copilot) below.**
 
@@ -72,8 +72,9 @@ The determinism lives in the repo, so the spoken prompt can stay simple:
 
 - **`.github/copilot-instructions.md`** — tells Copilot the exact host, base path, typing rules
   (`int32`, `date-time`, `x-nullable`), no-auth, and operation names. Copilot reads it automatically.
-- **`.github/prompts/connect-workorder-agent.prompt.md`** — a saved prompt, so you run one command:
-  `/connect-workorder-agent`.
+- **`.github/prompts/connect-workorder-agent.prompt.md`** — a saved prompt for **VS Code** Copilot
+  (run `/connect-workorder-agent`). In the GitHub Copilot app, just type the sentence — the
+  instructions file above does the rest.
 - **`workorder-system/openapi.reference.json`** — a verified, known-good copy of the connector.
   If anything looks off on stage, use this file directly; Copilot is instructed to match it.
 
@@ -109,10 +110,10 @@ connector**, with a safe, pre-wired fallback already in place.
 
 ### On stage — Step 3: generate the connector with Copilot (natural language)
 
-1. In VS Code, open **GitHub Copilot Chat** and switch to **Agent** mode.
-2. Run the saved prompt: type **`/connect-workorder-agent`** and send. (Or just say, in your own
-   words: *"Connect our Work Order API to the agent so it can check warranty and create work
-   orders."*)
+1. Open **GitHub Copilot** on this repo — the **GitHub Copilot app**, or **VS Code** Copilot Chat in **Agent** mode.
+2. Say it in plain English: *"Connect our Work Order API to the agent so it can check warranty and
+   create work orders — generate the OpenAPI connector."* (VS Code shortcut: run the saved prompt
+   **`/connect-workorder-agent`**.)
 3. Copilot reads `server.js`, `lib/store.js`, and `.github/copilot-instructions.md`, then writes
    **`workorder-system/openapi.json`** and summarizes the two operations.
 4. (Optional, high-impact) Ask Copilot to prove it works before touching the cloud:
