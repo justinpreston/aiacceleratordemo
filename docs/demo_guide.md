@@ -104,6 +104,24 @@ The determinism lives in the repo, so the spoken prompt can stay simple:
      - `createWorkOrder`: "Creates a maintenance work order for a piece of equipment. Requires the
        asset ID and a short title; accepts priority and description."
    - **Save** and **Publish**.
+3. **Add the Dataverse tool** (for the vendor / SLA / cost cross-source moment). The **Equipment
+   Service Contract** table already exists in Dataverse — you just need the agent to look up a row
+   by asset ID, no OData filter to fumble live.
+   - **Do-once in Power Apps — make `AssetId` a key:** [make.powerapps.com](https://make.powerapps.com)
+     → **Tables** → **Equipment Service Contract** → **Keys** → **New key**. Name it `AssetId Key`,
+     add the **Asset Id** column, **Save**, and wait for it to activate.
+   - **In Copilot Studio:** on the agent, **Tools → Add a tool → Microsoft Dataverse →** action
+     **Get a row by ID / alternate key**.
+   - **Table** = Equipment Service Contract (fixed value).
+   - It exposes an **Alternate key** input — add **AssetId** and set it to **Dynamically fill with AI**.
+   - **Description:** "The equipment asset ID, e.g., CE-LAS-3300."
+   - Give the tool itself a clear description so the orchestrator knows when to call it (e.g., "Looks
+     up the service contract, vendor, SLA response time, and renewal cost for a piece of equipment by
+     its asset ID"), then **Save** and **Publish**.
+
+   > Why the alternate key: the agent fetches the contract row directly by `AssetId` — no OData string
+   > to build on stage. **Dynamically fill with AI** lets the orchestrator pull the asset ID straight
+   > from the user's question (e.g., *"who's the vendor for CE-LAS-3300?"*).
 
 After this, the tools already work. The live moment is about **showing how Copilot builds the
 connector**, with a safe, pre-wired fallback already in place.
