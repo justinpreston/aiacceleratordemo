@@ -264,16 +264,18 @@ A successful install returns a `TitleId` and `AppId` \u2014 save them for update
 
 ## 7. Prepare for the "Extend with code" step
 
-During the demo you build an **Azure Function** that calls the Work Order & Warranty System deployed in Part C, then add it as a tool in Copilot Studio. To be ready:
+During the demo you use **GitHub Copilot** to generate an OpenAPI connector for the Work Order & Warranty System deployed in Part C, then add it as a tool in Copilot Studio — no separate Azure Function required. To be ready:
 
-- Have the **`apiBaseUrl`** from Part C available. The Function will call:
-  - `GET  {apiBaseUrl}/equipment/{assetId}/warranty` \u2014 check warranty.
-  - `POST {apiBaseUrl}/workorders` \u2014 create a work order.
-  - `GET  {apiBaseUrl}/workorders?assetId={assetId}` \u2014 look up existing work orders.
-- Ensure you have the **Azure Functions** extension in VS Code and are signed in to Azure.
+- Redeploy the Work Order & Warranty System so the named routes are live (they ship in `workorder-system/server.js`):
+  - `GET  /api/checkWarranty?assetId={assetId}` — check warranty.
+  - `POST /api/createWorkOrder` — create a work order.
+
+  From the `workorder-system/` folder: `az webapp up --name app-contosowo-yzfxfgch3lcyu --resource-group AIAcceleratorDemo --runtime "NODE:20-lts"`.
+- Have **GitHub Copilot** enabled in VS Code (Agent mode) with this repo open. The determinism lives in `.github/copilot-instructions.md`, the saved prompt `.github/prompts/connect-workorder-agent.prompt.md`, and the verified fallback `workorder-system/openapi.reference.json`.
+- **Pre-import the custom connector** in Copilot Studio (from `openapi.reference.json`) and add both tools, so the live step is safe.
 - Note the **asset IDs** (e.g., `CE-OSC-1200`, `CE-LAS-3300`) used in demo questions.
 
-See [demo_guide.md](./demo_guide.md) for the full run-of-show and sample questions.
+See [demo_guide.md](./demo_guide.md) → **Extending the agent with GitHub Copilot** for the full run-of-show and sample questions.
 
 ---
 
@@ -281,7 +283,7 @@ See [demo_guide.md](./demo_guide.md) for the full run-of-show and sample questio
 
 After the demo, to avoid charges:
 
-- Delete the resource group holding the Work Order & Warranty System (`rg-contoso-workorders`) and the Azure Function.
+- Delete the resource group holding the Work Order & Warranty System.
 - Delete the Azure AI Search service and storage account (or their resource group).
 - Uninstall the Cowork plugin: `atk uninstall --title-id <TitleId>` (or remove it from the M365 admin center), using the `TitleId` saved during install.
 - Optionally remove the SharePoint library and unpublish the Copilot Studio agent.

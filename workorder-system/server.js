@@ -109,6 +109,31 @@ app.patch('/api/workorders/:id', (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// Named agent operations
+// Thin, clearly-named aliases the Copilot Studio agent calls as tools. They map
+// 1:1 to the OpenAPI connector (operationIds checkWarranty / createWorkOrder) so
+// the "extend the agent with code" demo step reads naturally. See
+// workorder-system/openapi.reference.json and docs/demo_guide.md.
+// ---------------------------------------------------------------------------
+
+// checkWarranty: GET /api/checkWarranty?assetId=CE-OSC-1200
+app.get('/api/checkWarranty', (req, res) => {
+  if (!req.query.assetId) {
+    return res.status(400).json({ error: 'Query parameter assetId is required.' });
+  }
+  const warranty = store.getWarranty(req.query.assetId);
+  if (!warranty) return res.status(404).json({ error: `Equipment '${req.query.assetId}' not found.` });
+  res.json(warranty);
+});
+
+// createWorkOrder: POST /api/createWorkOrder  { assetId, title, priority?, description?, requestedBy? }
+app.post('/api/createWorkOrder', (req, res) => {
+  const result = store.createWorkOrder(req.body || {});
+  if (result.errors) return res.status(400).json({ errors: result.errors });
+  res.status(201).json(result.workOrder);
+});
+
+// ---------------------------------------------------------------------------
 // Dashboard stats + static UI
 // ---------------------------------------------------------------------------
 app.get('/api/stats', (_req, res) => {
