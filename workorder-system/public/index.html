@@ -9,10 +9,31 @@
 <body>
   <header class="app-header">
     <div class="brand">
-      <span class="brand-mark">Contoso Electronics</span>
-      <span class="brand-sub">Equipment Work Order &amp; Warranty System</span>
+      <span class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="36" height="36" rx="10" fill="url(#cxg)" />
+          <path d="M20 10.5l8.23 4.75v9.5L20 29.5l-8.23-4.75v-9.5L20 10.5z" stroke="#fff" stroke-width="1.9" stroke-linejoin="round" />
+          <circle cx="20" cy="20" r="3.4" fill="#fff" />
+          <defs>
+            <linearGradient id="cxg" x1="2" y1="2" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#2899f5" />
+              <stop offset="1" stop-color="#0a4d87" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <span class="brand-mark">Contoso Electronics</span>
+        <span class="brand-sub">Equipment Work Order &amp; Warranty System</span>
+      </span>
     </div>
-    <button id="refreshBtn" class="btn btn-ghost" title="Refresh">Refresh</button>
+    <div class="header-actions">
+      <span class="env-pill"><span class="env-dot"></span> Live demo</span>
+      <button id="refreshBtn" class="btn btn-ghost" title="Refresh">
+        <svg class="btn-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 0 0-14-4.6L4 8" /><path d="M4 4v4h4" /><path d="M4 13a8 8 0 0 0 14 4.6L20 16" /><path d="M20 20v-4h-4" /></svg>
+        Refresh
+      </button>
+    </div>
   </header>
 
   <main class="container">
@@ -20,6 +41,7 @@
 
     <section class="panel">
       <div class="panel-head">
+        <span class="panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></svg></span>
         <h2>Create Work Order</h2>
       </div>
       <form id="workOrderForm" class="form-grid">
@@ -57,6 +79,7 @@
 
     <section class="panel">
       <div class="panel-head">
+        <span class="panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z" /><path d="M9 12l2 2 4-4" /></svg></span>
         <h2>Equipment &amp; Warranty</h2>
       </div>
       <div class="table-wrap">
@@ -78,6 +101,7 @@
 
     <section class="panel">
       <div class="panel-head">
+        <span class="panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2" /><path d="M9 4V3.5A1.5 1.5 0 0 1 10.5 2h3A1.5 1.5 0 0 1 15 3.5V4" /><path d="M8.5 9.5h7M8.5 13h7M8.5 16.5h4" /></svg></span>
         <h2>Work Orders</h2>
       </div>
       <div class="table-wrap">
