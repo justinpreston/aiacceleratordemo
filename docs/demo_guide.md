@@ -79,14 +79,15 @@ The determinism lives in the repo, so the spoken prompt can stay simple:
 
 ### Do once (before the demo)
 
-1. **Deploy the latest API** so the two named routes are live (they ship in
-   `workorder-system/server.js`). From the `workorder-system/` folder:
-   ```bash
-   az webapp up --name app-contosowo-yzfxfgch3lcyu --resource-group AIAcceleratorDemo --runtime "NODE:20-lts"
-   ```
-   Smoke-test:
+1. **Confirm the two named routes are live** — they're already deployed (they ship in
+   `workorder-system/server.js`). Smoke-test:
    ```bash
    curl "https://app-contosowo-yzfxfgch3lcyu.azurewebsites.net/api/checkWarranty?assetId=CE-OSC-1200"
+   ```
+   You should get warranty JSON. Only if you instead get `Cannot GET /api/checkWarranty`, redeploy
+   from the `workorder-system/` folder — the app runs **Node 22**, so don't downgrade the runtime:
+   ```bash
+   az webapp up --name app-contosowo-yzfxfgch3lcyu --resource-group AIAcceleratorDemo --runtime "NODE:22-lts"
    ```
 2. **Pre-import the custom connector** in Copilot Studio so nothing fragile happens live:
    - In [Copilot Studio](https://copilotstudio.microsoft.com) open the **Contoso Maintenance

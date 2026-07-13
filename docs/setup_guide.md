@@ -266,11 +266,11 @@ A successful install returns a `TitleId` and `AppId` \u2014 save them for update
 
 During the demo you use **GitHub Copilot** to generate an OpenAPI connector for the Work Order & Warranty System deployed in Part C, then add it as a tool in Copilot Studio — no separate Azure Function required. To be ready:
 
-- Redeploy the Work Order & Warranty System so the named routes are live (they ship in `workorder-system/server.js`):
+- Confirm the two named routes are already live (they ship in `workorder-system/server.js`):
   - `GET  /api/checkWarranty?assetId={assetId}` — check warranty.
   - `POST /api/createWorkOrder` — create a work order.
 
-  From the `workorder-system/` folder: `az webapp up --name app-contosowo-yzfxfgch3lcyu --resource-group AIAcceleratorDemo --runtime "NODE:20-lts"`.
+  Verify with `curl "https://app-contosowo-yzfxfgch3lcyu.azurewebsites.net/api/checkWarranty?assetId=CE-OSC-1200"`. Only if it 404s, redeploy from `workorder-system/`: `az webapp up --name app-contosowo-yzfxfgch3lcyu --resource-group AIAcceleratorDemo --runtime "NODE:22-lts"` (the app runs Node 22 — don't downgrade).
 - Have **GitHub Copilot** enabled in VS Code (Agent mode) with this repo open. The determinism lives in `.github/copilot-instructions.md`, the saved prompt `.github/prompts/connect-workorder-agent.prompt.md`, and the verified fallback `workorder-system/openapi.reference.json`.
 - **Pre-import the custom connector** in Copilot Studio (from `openapi.reference.json`) and add both tools, so the live step is safe.
 - Note the **asset IDs** (e.g., `CE-OSC-1200`, `CE-LAS-3300`) used in demo questions.
