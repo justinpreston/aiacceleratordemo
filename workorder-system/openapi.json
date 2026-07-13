@@ -2,33 +2,42 @@
   "swagger": "2.0",
   "info": {
     "title": "Contoso Work Order & Warranty API",
-    "description": "Two operations the Contoso Maintenance Assistant agent uses to take action: check an asset's warranty status and create a maintenance work order. Backed by the deployed Work Order & Warranty System.",
+    "description": "Two operations the Contoso Maintenance Assistant agent uses to take action on equipment: check an asset's warranty status and create a maintenance work order. Backed by the deployed Work Order & Warranty System.",
     "version": "1.0.0"
   },
   "host": "app-contosowo-yzfxfgch3lcyu.azurewebsites.net",
   "basePath": "/api",
-  "schemes": ["https"],
-  "consumes": ["application/json"],
-  "produces": ["application/json"],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "paths": {
     "/checkWarranty": {
       "get": {
         "operationId": "checkWarranty",
-        "summary": "Check equipment warranty",
-        "description": "Checks the warranty status of a piece of equipment by its asset ID (for example CE-OSC-1200). Returns whether it is under warranty and how many days remain.",
+        "summary": "Check equipment warranty status",
+        "description": "Check whether a specific piece of Contoso equipment is currently under warranty, by its asset ID (e.g. CE-OSC-1200, CE-LAS-3300). Returns the equipment name and model, warranty provider, install and expiry dates, an Active/Expired status, whether it is under warranty, and the number of days remaining (negative if already expired). Use this whenever the user asks about warranty, coverage, support eligibility, or whether equipment is still under warranty.",
         "parameters": [
           {
             "name": "assetId",
             "in": "query",
             "required": true,
             "type": "string",
-            "description": "The equipment asset ID, e.g. CE-OSC-1200."
+            "description": "The equipment asset ID to check, e.g. CE-OSC-1200.",
+            "x-ms-summary": "Asset ID"
           }
         ],
         "responses": {
           "200": {
             "description": "Warranty status for the asset.",
-            "schema": { "$ref": "#/definitions/WarrantyStatus" },
+            "schema": {
+              "$ref": "#/definitions/WarrantyStatus"
+            },
             "examples": {
               "application/json": {
                 "assetId": "CE-OSC-1200",
@@ -47,11 +56,15 @@
           },
           "400": {
             "description": "The assetId query parameter is missing.",
-            "schema": { "$ref": "#/definitions/Error" }
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           },
           "404": {
             "description": "No equipment found for the given asset ID.",
-            "schema": { "$ref": "#/definitions/Error" }
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -59,20 +72,25 @@
     "/createWorkOrder": {
       "post": {
         "operationId": "createWorkOrder",
-        "summary": "Create a work order",
-        "description": "Creates a maintenance work order for a piece of equipment. Requires the asset ID and a short title; priority, description, and requestedBy are optional.",
+        "summary": "Create a maintenance work order",
+        "description": "Create a maintenance work order for a piece of Contoso equipment. Requires the equipment asset ID (e.g. CE-LAS-3300) and a short title describing the problem. Optionally accepts priority (Low, Medium, High, or Critical - defaults to Medium), a longer description, and the name of the requester. Returns the created work order with its ID, status, and whether the asset was under warranty at creation. Use this whenever the user wants to open, raise, log, file, or create a repair, service, or maintenance request for equipment.",
         "parameters": [
           {
             "name": "body",
             "in": "body",
             "required": true,
-            "schema": { "$ref": "#/definitions/CreateWorkOrderRequest" }
+            "schema": {
+              "$ref": "#/definitions/CreateWorkOrderRequest"
+            },
+            "description": "The work order to create."
           }
         ],
         "responses": {
           "201": {
             "description": "The created work order.",
-            "schema": { "$ref": "#/definitions/WorkOrder" },
+            "schema": {
+              "$ref": "#/definitions/WorkOrder"
+            },
             "examples": {
               "application/json": {
                 "id": "WO-2026-0002",
@@ -95,7 +113,9 @@
           },
           "400": {
             "description": "Validation failed (missing assetId or title, unknown asset, or invalid priority).",
-            "schema": { "$ref": "#/definitions/ValidationError" }
+            "schema": {
+              "$ref": "#/definitions/ValidationError"
+            }
           }
         }
       }
@@ -105,67 +125,172 @@
     "WarrantyStatus": {
       "type": "object",
       "properties": {
-        "assetId": { "type": "string" },
-        "name": { "type": "string" },
-        "model": { "type": "string" },
-        "warrantyProvider": { "type": "string" },
-        "installDate": { "type": "string", "format": "date" },
-        "warrantyExpiry": { "type": "string", "format": "date" },
-        "underWarranty": { "type": "boolean" },
-        "status": { "type": "string", "description": "Active or Expired." },
-        "daysRemaining": { "type": "integer", "format": "int32", "description": "Days until warranty expiry; negative if already expired." },
-        "supportContact": { "type": "string" },
-        "checkedAt": { "type": "string", "format": "date-time" }
+        "assetId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "warrantyProvider": {
+          "type": "string"
+        },
+        "installDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "warrantyExpiry": {
+          "type": "string",
+          "format": "date"
+        },
+        "underWarranty": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "description": "Active or Expired."
+        },
+        "daysRemaining": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Days until warranty expiry; negative if already expired."
+        },
+        "supportContact": {
+          "type": "string"
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     },
     "CreateWorkOrderRequest": {
       "type": "object",
-      "required": ["assetId", "title"],
+      "required": [
+        "assetId",
+        "title"
+      ],
       "properties": {
-        "assetId": { "type": "string", "description": "The equipment asset ID the work order is for, e.g. CE-LAS-3300." },
-        "title": { "type": "string", "description": "Short summary of the issue." },
-        "priority": { "type": "string", "enum": ["Low", "Medium", "High", "Critical"], "default": "Medium" },
-        "description": { "type": "string", "description": "Optional detailed description of the issue." },
-        "requestedBy": { "type": "string", "description": "Who requested the work order. Defaults to 'Copilot Agent'." }
+        "assetId": {
+          "type": "string",
+          "description": "The equipment asset ID the work order is for, e.g. CE-LAS-3300.",
+          "x-ms-summary": "Asset ID"
+        },
+        "title": {
+          "type": "string",
+          "description": "Short summary of the issue.",
+          "x-ms-summary": "Title"
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "Low",
+            "Medium",
+            "High",
+            "Critical"
+          ],
+          "default": "Medium",
+          "x-ms-summary": "Priority"
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional detailed description of the issue.",
+          "x-ms-summary": "Description"
+        },
+        "requestedBy": {
+          "type": "string",
+          "description": "Who requested the work order. Defaults to 'Copilot Agent'.",
+          "x-ms-summary": "Requested by"
+        }
       }
     },
     "WorkOrder": {
       "type": "object",
       "properties": {
-        "id": { "type": "string" },
-        "assetId": { "type": "string" },
-        "equipmentName": { "type": "string" },
-        "equipmentModel": { "type": "string" },
-        "location": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "priority": { "type": "string" },
-        "status": { "type": "string" },
-        "requestedBy": { "type": "string" },
-        "assignedTo": { "type": "string", "x-nullable": true },
-        "underWarrantyAtCreation": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" },
-        "notes": { "type": "array", "items": { "$ref": "#/definitions/WorkOrderNote" } }
+        "id": {
+          "type": "string"
+        },
+        "assetId": {
+          "type": "string"
+        },
+        "equipmentName": {
+          "type": "string"
+        },
+        "equipmentModel": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "priority": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "requestedBy": {
+          "type": "string"
+        },
+        "assignedTo": {
+          "type": "string",
+          "x-nullable": true
+        },
+        "underWarrantyAtCreation": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WorkOrderNote"
+          }
+        }
       }
     },
     "WorkOrderNote": {
       "type": "object",
       "properties": {
-        "text": { "type": "string" },
-        "at": { "type": "string", "format": "date-time" }
+        "text": {
+          "type": "string"
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     },
     "Error": {
       "type": "object",
       "properties": {
-        "error": { "type": "string" }
+        "error": {
+          "type": "string"
+        }
       }
     },
     "ValidationError": {
       "type": "object",
       "properties": {
-        "errors": { "type": "array", "items": { "type": "string" } }
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     }
   }
