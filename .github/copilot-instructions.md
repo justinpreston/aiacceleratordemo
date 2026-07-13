@@ -1,7 +1,7 @@
 # Copilot instructions — AI Solution Accelerator demo
 
 This repo powers a live demo (see `docs/demo_guide.md`). The on-stage moment is a
-presenter asking GitHub Copilot, **in plain English**, to connect our Work Order API
+presenter asking GitHub Copilot, **in plain English**, to connect our Work Order system
 to the Copilot Studio agent. Your job is to make that reliable and boring to run.
 
 ## The Work Order & Warranty System API
@@ -18,7 +18,7 @@ Two operations the agent calls as tools:
 
 `priority` is one of `Low`, `Medium`, `High`, `Critical` (defaults to `Medium`). The API needs **no authentication** for the demo.
 
-## When asked to "connect the API to the agent" / "generate the OpenAPI"
+## When asked to "connect the Work Order system to the agent" / "generate the OpenAPI"
 
 Produce `workorder-system/openapi.json` as an **OpenAPI 2.0 (Swagger)** custom-connector
 file that imports cleanly into Power Apps / Copilot Studio. Requirements:

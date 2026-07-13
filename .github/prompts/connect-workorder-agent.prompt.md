@@ -1,9 +1,9 @@
 ---
 mode: agent
-description: Connect the Work Order API to the Copilot Studio agent (generate the OpenAPI connector)
+description: Connect the Work Order system to the Copilot Studio agent (generate the OpenAPI connector)
 ---
 
-Connect our Work Order API to the Copilot Studio agent so it can **check warranty** and
+Connect our Work Order system to the Copilot Studio agent so it can **check warranty** and
 **create work orders**.
 
 Look at the `checkWarranty` and `createWorkOrder` routes in `workorder-system/server.js`
