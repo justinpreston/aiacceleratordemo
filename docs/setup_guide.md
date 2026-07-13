@@ -211,10 +211,22 @@ az webapp up `
 2. In the **Test** pane, ask a mix of questions that hit both sources (see [demo_guide.md](./demo_guide.md)).
 3. Confirm answers cite equipment content and that both SharePoint and Azure AI Search sources return results.
 
-### 5.5 Publish
+### 5.5 Publish and add the Teams / Microsoft 365 Copilot channel
 
-1. Select **Publish** to make the agent available.
-2. Optionally add channels (Teams, custom website) as needed for the demo.
+Clicking **Publish** alone only makes the agent live for testing and link sharing — it will **not** appear in the Microsoft Teams app store or the Microsoft 365 Copilot store. To list it there you must add the channel and (for org-wide visibility) get admin approval.
+
+1. Select **Publish** to make the latest changes live.
+2. Open the agent's **Channels** page and select **Teams and Microsoft 365 Copilot** → **Add channel**. This single channel covers both the Teams store and the Microsoft 365 Copilot store.
+3. Set **Availability options**:
+   - **Show to my teammates and shared users** — link/sideload sharing only; the agent will **not** appear in the store.
+   - **Show to everyone in my org** → **Submit for admin approval** — required for the agent to appear in the Teams and Microsoft 365 Copilot stores.
+4. **Publish** again so the channel change takes effect.
+5. **(Admin)** Approve the agent in **Teams Admin Center → Teams apps → Manage apps**: find the agent, then set it to **Allowed** / **Publish**. If your tenant gates custom apps, the agent stays in **Pending approval** here until an admin acts — this is the most common reason a published agent never shows up in the store.
+6. Allow time for the listing to propagate (often a few hours, up to ~24h). Users may need to sign out and back in. Verify under **Teams → Apps → Built for your org** and in the **Microsoft 365 Copilot store**.
+
+> Troubleshooting: if the agent shows under **Built for your org** but not in the main store, it's approved but still propagating or restricted by an app **setup/permission policy** (Teams Admin Center → Permission policies). If it doesn't appear at all, either the channel was never added (step 2) or admin approval is still pending (step 5).
+
+You can also add other channels (custom website, etc.) from the same **Channels** page as needed for the demo.
 
 ---
 
