@@ -2,6 +2,14 @@
 
 const API = '';
 
+const ICONS = {
+  equipment: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+  warranty: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+  expired: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3L12 4z"/><path d="M12 10v4M12 17h.01"/></svg>',
+  open: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  total: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="16" rx="2"/><path d="M9 4V3.5A1.5 1.5 0 0 1 10.5 2h3A1.5 1.5 0 0 1 15 3.5V4"/><path d="M8.5 9.5h7M8.5 13h7M8.5 16.5h4"/></svg>',
+};
+
 document.getElementById('apiBase').textContent = window.location.origin + '/api';
 
 function el(tag, attrs = {}, children = []) {
@@ -40,19 +48,22 @@ function statusBadge(status) {
 async function loadStats() {
   const s = await getJSON(`${API}/api/stats`);
   const cards = [
-    { value: s.totalEquipment, label: 'Total Equipment' },
-    { value: s.underWarranty, label: 'Under Warranty' },
-    { value: s.warrantyExpired, label: 'Warranty Expired' },
-    { value: s.openWorkOrders, label: 'Open Work Orders' },
-    { value: s.totalWorkOrders, label: 'Total Work Orders' },
+    { value: s.totalEquipment, label: 'Total Equipment', icon: ICONS.equipment, accent: 'blue' },
+    { value: s.underWarranty, label: 'Under Warranty', icon: ICONS.warranty, accent: 'green' },
+    { value: s.warrantyExpired, label: 'Warranty Expired', icon: ICONS.expired, accent: 'red' },
+    { value: s.openWorkOrders, label: 'Open Work Orders', icon: ICONS.open, accent: 'amber' },
+    { value: s.totalWorkOrders, label: 'Total Work Orders', icon: ICONS.total, accent: 'slate' },
   ];
   const container = document.getElementById('statCards');
   container.innerHTML = '';
   cards.forEach((c) => {
     container.appendChild(
-      el('div', { class: 'card' }, [
-        el('div', { class: 'value' }, String(c.value)),
-        el('div', { class: 'label' }, c.label),
+      el('div', { class: `card accent-${c.accent}` }, [
+        el('span', { class: 'card-icon', html: c.icon }),
+        el('div', { class: 'card-main' }, [
+          el('div', { class: 'value' }, String(c.value)),
+          el('div', { class: 'label' }, c.label),
+        ]),
       ])
     );
   });
